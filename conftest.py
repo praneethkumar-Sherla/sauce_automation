@@ -13,6 +13,19 @@ from pages.checkout_page import CheckoutPage
 
 @pytest.fixture(scope="session")
 def browser_context(request):
+    """
+    Create a browser context fixture with session scope for all tests.
+    
+    Args:
+        request: Pytest request object containing configuration options.
+        
+    Yields:
+        BrowserContext: Playwright browser context for test execution.
+        
+    Raises:
+        ValueError: If an invalid browser name is provided via --browser option.
+        Exception: If browser launch or context creation fails.
+    """
     # Use pytest-playwright's --browser option (returns a list, get first or default to chromium)
     browser_options = request.config.getoption("--browser")
     browser_name = browser_options[0] if browser_options else "chromium"
@@ -36,6 +49,18 @@ def browser_context(request):
 
 @pytest.fixture
 def page(browser_context):
+    """
+    Create a new page fixture for each test.
+    
+    Args:
+        browser_context: Browser context fixture from which to create the page.
+        
+    Yields:
+        Page: Playwright page object with default timeout of 10000ms.
+        
+    Raises:
+        Exception: If page creation fails.
+    """
     page = browser_context.new_page()
     page.set_default_timeout(10000)
     yield page
@@ -63,6 +88,17 @@ def checkout_page(page):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_sessionfinish(session, exitstatus):
+    """
+    Pytest hook that runs after all tests complete to generate and open Allure report.
+    
+    Args:
+        session: Pytest session object containing test session information.
+        exitstatus: Exit status code from the test session.
+        
+    Raises:
+        subprocess.CalledProcessError: If Allure report generation fails.
+        Exception: If any unexpected error occurs during report generation or opening.
+    """
     end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     print(f" Test session ended at {end_time}")
 
